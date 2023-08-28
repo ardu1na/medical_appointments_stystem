@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.http import request
+
 
 class BaseModel(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
@@ -15,7 +17,7 @@ class PersonaBaseModel(models.Model):
     
     phone = models.CharField(max_length=40, null=True, blank=True)
     whats_app = models.CharField(max_length=40, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
+    email = models.EmailField()
     
     class Meta:
         abstract = True
@@ -89,7 +91,11 @@ class Doctor(BaseModel, PersonaBaseModel):
 
 
 class Recepcionist(BaseModel, PersonaBaseModel):
-    user = models.OneToOneField(User, verbose_name="Nombre de Usuario", related_name="recepcionist_profile", on_delete=models.CASCADE)
+    user = models.OneToOneField(
+                    User,
+                    verbose_name="Nombre de Usuario",
+                    related_name="recepcionist",
+                    on_delete=models.CASCADE, blank=True, null=True)
     
     class Meta:
         verbose_name = "Recepcionista"
@@ -97,17 +103,36 @@ class Recepcionist(BaseModel, PersonaBaseModel):
 
     def __str__ (self):
         return f'{self.name} {self.last_name}'
+    
+           
+    def save(self, *args, **kwargs):
+        if not self.user:
+            name = self.name.lower().replace(' ', '_')
+            last_name = self.last_name.lower().replace(' ', '_')
+            
+            self.user = User.objects.create_user(
+                    username = f'{name}_{last_name}',
+                    email = self.email,
+                    password = "contraseña123", # pedirle al usuario que actualice su contraseña al registrase
+                    first_name=self.name,
+                    last_name=self.last_name,
+                    is_active = True,
+                    is_staff = True,
+                )
+            self.user.save()
+        super().save(*args, **kwargs)
+
 
 
 class Appointment(BaseModel):
     patient = models.ForeignKey(Patient, related_name="appointments", verbose_name="paciente",on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, related_name="appointments",verbose_name="doctor", on_delete=models.SET_NULL, null=True)
     
-    receptionist = models.ForeignKey(
+    recepcionist = models.ForeignKey(
                             Recepcionist,
                             related_name="appointments",
                             verbose_name="recepcionista",
-                            on_delete=models.SET_NULL, null=True)
+                            on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     
     start_date = models.DateTimeField(verbose_name="Fecha de inicio",)
     end_date = models.DateTimeField(verbose_name="Fecha de culminación",)
@@ -115,9 +140,12 @@ class Appointment(BaseModel):
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
     def __str__ (self):
-        return f'{self.start_date} turno de {self.patient} con {self.doctor}'
+        date = self.start_date.strftime('%H:%M %d/%m')
+
+        return f'{date} turno de {self.patient} con {self.doctor}'
     
     class Meta:
         verbose_name = "Turno"
         verbose_name_plural = "Turnos"
-
+        
+        
