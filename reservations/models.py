@@ -59,9 +59,15 @@ class Patient(BaseModel, PersonaBaseModel):
     
     insurance_data = models.CharField(verbose_name="N° de Afiliado", max_length=100, null=True, blank=True)
     
+    arrived_time = models.DateTimeField(null=True, blank=True)
+    
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
-     
+    
+    referent_1 = models.ForeignKey('Patient', related_name="patients", verbose_name="Referente",on_delete=models.SET_NULL, null=True, blank=True)
+    
+    referent_2 = models.ForeignKey('Patient', related_name="patients2", verbose_name="Referente",on_delete=models.SET_NULL, null=True, blank=True) 
+    
     class Meta:
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
@@ -80,8 +86,8 @@ class Area(BaseModel):
 class Doctor(BaseModel, PersonaBaseModel):
     area = models.ForeignKey(Area, verbose_name="área", related_name="doctors", on_delete=models.SET_NULL, null=True)
     class Meta:
-        verbose_name_plural = "Médicos"
-        verbose_name = "Médico"
+        verbose_name_plural = "Profesionales"
+        verbose_name = "Profesional"
 
     def __str__ (self):
         inicial = self.name[-1].upper()
@@ -131,7 +137,7 @@ class Recepcionist(BaseModel, PersonaBaseModel):
 
 class Appointment(BaseModel):
     patient = models.ForeignKey(Patient, related_name="appointments", verbose_name="paciente",on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, related_name="appointments",verbose_name="doctor", on_delete=models.SET_NULL, null=True)
+    doctor = models.ForeignKey(Doctor, related_name="appointments",verbose_name="profesional", on_delete=models.SET_NULL, null=True)
     
     recepcionist = models.ForeignKey(
                             Recepcionist,
@@ -140,7 +146,6 @@ class Appointment(BaseModel):
                             on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     
     start_date = models.DateTimeField(verbose_name="Fecha de inicio",)
-    end_date = models.DateTimeField(verbose_name="Fecha de culminación",)
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
@@ -154,10 +159,6 @@ class Appointment(BaseModel):
         return date
     
     
-    @property
-    def end(self):
-        date = self.end_date.strftime('%H:%M %d/%m')
-        return date
     
     
     

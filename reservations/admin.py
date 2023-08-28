@@ -55,8 +55,8 @@ class AppointmentAdmin(admin.ModelAdmin):
         if not obj.recepcionist:
             obj.recepcionist = request.user.recepcionist
         obj.save()
-    list_display = ['start', 'end', 'patient', 'doctor', 'area', 'recepcionist']
-    list_display_links = ['start' , 'end', 'patient']
+    list_display = ['start', 'patient', 'doctor', 'area', 'recepcionist']
+    list_display_links = ['start' , 'patient']
     search_fields = ['patient__name','patient__last_name', 'doctor__last_name', 'doctor__name', 'doctor__area__name']
     date_hierarchy = 'start_date'
 
@@ -88,16 +88,16 @@ class PatientAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Datos Personales', {
-            'fields': ('name', 'last_name', 'identification', 'dob', 'gender')
+            'fields': (('name', 'last_name'), ('gender', 'identification'),  'dob')
         }),
         ('Contacto', {
-            'fields':  ('direccion', 'phone', 'whats_app', 'email')
+            'fields':  ('direccion','phone', 'whats_app', 'email')
         }),
         ('Obra social', {
             'fields':  ('healt_insurance', 'insurance_data',)
         }),
         (None, {
-            'fields': ( 'notes',)
+            'fields': ( 'referent_1', 'referent_2','notes', )
         })
     )
 admin.site.register(Patient, PatientAdmin)
