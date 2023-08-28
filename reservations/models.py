@@ -1,6 +1,8 @@
+from datetime import date
+today = date.today()
+
 from django.db import models
 from django.contrib.auth.models import User
-from django.http import request
 
 
 class BaseModel(models.Model):
@@ -14,10 +16,6 @@ class BaseModel(models.Model):
 class PersonaBaseModel(models.Model):
     name = models.CharField(max_length=150, verbose_name="Nombre")
     last_name = models.CharField(max_length=150,verbose_name="Apellido")
-    
-    phone = models.CharField(max_length=40, null=True, blank=True)
-    whats_app = models.CharField(max_length=40, null=True, blank=True)
-    email = models.EmailField()
     
     class Meta:
         abstract = True
@@ -44,8 +42,18 @@ class Patient(BaseModel, PersonaBaseModel):
     gender = models.CharField(choices=GENDER_CHOICES, null=True, default=None, verbose_name="sexo", max_length=20)
     dob = models.DateField(verbose_name="Fecha de nacimiento")
     
+    @property
+    def edad(self):
+        current_age = today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
+        return current_age
+    
     direccion = models.CharField(max_length=400, null=True, blank=True)
 
+    
+    phone = models.CharField(max_length=40, null=True, blank=True)
+    whats_app = models.CharField(max_length=40, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    
     healt_insurance = models.ForeignKey(HealthInsurance, related_name="patients",verbose_name="obra social", on_delete=models.SET_NULL, null=True)
     
     insurance_data = models.CharField(verbose_name="N° de Afiliado", max_length=100, null=True, blank=True)
@@ -57,24 +65,16 @@ class Patient(BaseModel, PersonaBaseModel):
     def __str__ (self):
         return f'{self.last_name}, {self.name}'
     
-class ClinicalHistory(BaseModel):
-    patient = models.OneToOneField(Patient, verbose_name="paciente", related_name="history", on_delete=models.CASCADE)
-    
-    notes = models.TextField(null=True, verbose_name="Notas", blank=True)
-    
-    class Meta:
-        verbose_name = "Historia Clínica"
-        verbose_name_plural = "Historias Clínicas"
-    
-    
-    def __str__ (self):
-        return f'{self.patient} clinical history'
-
-
 
 class Area(BaseModel):
     name = models.CharField(max_length=100, verbose_name="nombre")
     
+    @property
+    def doctors(self):
+        doctors = self.doctors.all()
+        if self.doctors != None:
+            print(doctors)
+        return "ha"
     
     def __str__ (self):
         return self.name
@@ -82,10 +82,11 @@ class Area(BaseModel):
 class Doctor(BaseModel, PersonaBaseModel):
     area = models.ForeignKey(Area, verbose_name="área", related_name="doctors", on_delete=models.SET_NULL, null=True)
     class Meta:
-        verbose_name_plural = "Doctores"
+        verbose_name_plural = "Médicos"
+        verbose_name = "Médico"
 
     def __str__ (self):
-        return f'{self.last_name} ({self.area})'
+        return f'{self.last_name}'
     
 
 
@@ -96,6 +97,11 @@ class Recepcionist(BaseModel, PersonaBaseModel):
                     verbose_name="Nombre de Usuario",
                     related_name="recepcionist",
                     on_delete=models.CASCADE, blank=True, null=True)
+    
+    
+    phone = models.CharField(max_length=40, null=True, blank=True)
+    whats_app = models.CharField(max_length=40, null=True, blank=True)
+    email = models.EmailField()
     
     class Meta:
         verbose_name = "Recepcionista"
@@ -138,6 +144,23 @@ class Appointment(BaseModel):
     end_date = models.DateTimeField(verbose_name="Fecha de culminación",)
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
+    
+    @property
+    def area(self):
+        return self.doctor.area
+    
+    @property
+    def start(self):
+        date = self.start_date.strftime('%H:%M %d/%m')
+        return date
+    
+    
+    @property
+    def end(self):
+        date = self.end_date.strftime('%H:%M %d/%m')
+        return date
+    
+    
     
     def __str__ (self):
         date = self.start_date.strftime('%H:%M %d/%m')
