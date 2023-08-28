@@ -16,6 +16,7 @@ class BaseModel(models.Model):
 class PersonaBaseModel(models.Model):
     name = models.CharField(max_length=150, verbose_name="Nombre")
     last_name = models.CharField(max_length=150,verbose_name="Apellido")
+    phone = models.CharField(max_length=40, null=True, blank=True, verbose_name="teléfono")
     
     class Meta:
         abstract = True
@@ -50,13 +51,16 @@ class Patient(BaseModel, PersonaBaseModel):
     direccion = models.CharField(max_length=400, null=True, blank=True)
 
     
-    phone = models.CharField(max_length=40, null=True, blank=True)
-    whats_app = models.CharField(max_length=40, null=True, blank=True)
+    
+    whats_app = models.CharField(max_length=40, null=True, blank=True, verbose_name="Whats App")
     email = models.EmailField(null=True, blank=True)
     
     healt_insurance = models.ForeignKey(HealthInsurance, related_name="patients",verbose_name="obra social", on_delete=models.SET_NULL, null=True)
     
     insurance_data = models.CharField(verbose_name="N° de Afiliado", max_length=100, null=True, blank=True)
+    
+    
+    notes = models.TextField(null=True, verbose_name="Notas", blank=True)
      
     class Meta:
         verbose_name = "Paciente"
@@ -69,12 +73,6 @@ class Patient(BaseModel, PersonaBaseModel):
 class Area(BaseModel):
     name = models.CharField(max_length=100, verbose_name="nombre")
     
-    @property
-    def doctors(self):
-        doctors = self.doctors.all()
-        if self.doctors != None:
-            print(doctors)
-        return "ha"
     
     def __str__ (self):
         return self.name
@@ -86,7 +84,8 @@ class Doctor(BaseModel, PersonaBaseModel):
         verbose_name = "Médico"
 
     def __str__ (self):
-        return f'{self.last_name}'
+        inicial = self.name[-1].upper()
+        return f'{self.last_name} {inicial}. ({self.area.name})'
     
 
 
@@ -165,7 +164,7 @@ class Appointment(BaseModel):
     def __str__ (self):
         date = self.start_date.strftime('%H:%M %d/%m')
 
-        return f'{date} turno de {self.patient} con {self.doctor}'
+        return f'{date} | {self.doctor}'
     
     class Meta:
         verbose_name = "Turno"

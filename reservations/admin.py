@@ -7,9 +7,9 @@ from reservations.models import Patient, Doctor, \
 
 
 
-admin.site.site_header = 'Sistema Recepción de Pacientes'
-admin.site.index_title = 'Sistema'
-admin.site.site_title = 'Sistema'
+admin.site.site_header = 'Turnos Médicos'
+admin.site.index_title = 'Administración'
+admin.site.site_title = 'Administración'
 
 
     
@@ -24,7 +24,7 @@ class DoctorInline(admin.StackedInline):
 class AreaAdmin(admin.ModelAdmin):
     inlines = [DoctorInline,]
     list_display = ['name', 'medicos']
-    search_fields = ['name',]
+    search_fields = ['name']
    
     @admin.display(description='Staff')
     def medicos(self, obj, *args):
@@ -35,7 +35,6 @@ class AreaAdmin(admin.ModelAdmin):
                 s += medico.name + ' ' + medico.last_name
                 if index < len(medicos) - 1:
                     s += ', '
-            print(s)
         return s
 
                 
@@ -85,4 +84,20 @@ class PatientAdmin(admin.ModelAdmin):
     search_fields = ['name', 'last_name']
     list_filter = ['healt_insurance','gender']
     list_display_links = ['id' , 'name', 'last_name']
+    
+    
+    fieldsets = (
+        ('Datos Personales', {
+            'fields': ('name', 'last_name', 'identification', 'dob', 'gender')
+        }),
+        ('Contacto', {
+            'fields':  ('direccion', 'phone', 'whats_app', 'email')
+        }),
+        ('Obra social', {
+            'fields':  ('healt_insurance', 'insurance_data',)
+        }),
+        (None, {
+            'fields': ( 'notes',)
+        })
+    )
 admin.site.register(Patient, PatientAdmin)
