@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from reservations.models import Patient, Doctor, \
     Recepcionist, HealthInsurance, Area, \
-    Appointment
+    Appointment, Office
 
 
 
@@ -14,6 +14,7 @@ admin.site.site_title = 'Administración'
 
     
 admin.site.register(Recepcionist)
+admin.site.register(Office)
 
 
 class DoctorInline(admin.StackedInline):
@@ -55,8 +56,10 @@ class AppointmentAdmin(admin.ModelAdmin):
         if not obj.recepcionist:
             obj.recepcionist = request.user.recepcionist
         obj.save()
-    list_display = ['start', 'patient', 'doctor', 'area', 'recepcionist']
+    list_display = ['start','office', 'patient', 'doctor', 'area', 'recepcionist']
     list_display_links = ['start' , 'patient']
+    list_filter = ['office']
+
     search_fields = ['patient__name','patient__last_name', 'doctor__last_name', 'doctor__name', 'doctor__area__name']
     date_hierarchy = 'start_date'
 
@@ -84,7 +87,6 @@ class PatientAdmin(admin.ModelAdmin):
     search_fields = ['name', 'last_name']
     list_filter = ['healt_insurance','gender']
     list_display_links = ['id' , 'name', 'last_name']
-    
     
     fieldsets = (
         ('Datos Personales', {

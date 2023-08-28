@@ -132,17 +132,26 @@ class Recepcionist(BaseModel, PersonaBaseModel):
 
                     
                                     )
-            receptionist_group = Group.objects.get(name="recepcionistas")
+            receptionist_group = Group.objects.filter(name="recepcionistas").first()
+            if receptionist_group == None:
+                receptionist_group = Group.objects.create(name="recepcionistas")
             self.user.groups.add(receptionist_group) 
             self.user.save()
         super().save(*args, **kwargs)
 
-
+class Office(BaseModel):
+    number = models.PositiveSmallIntegerField(verbose_name="número")
+    def __str__ (self):
+        return str(self.number)
+    
+    class Meta:
+        verbose_name = "Consultorio"
+        verbose_name_plural = "Consultorios"
 
 class Appointment(BaseModel):
     patient = models.ForeignKey(Patient, related_name="appointments", verbose_name="paciente",on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, related_name="appointments",verbose_name="profesional", on_delete=models.SET_NULL, null=True)
-    
+    office = models.ForeignKey(Office, related_name="appointments",verbose_name="consultorio", on_delete=models.SET_NULL, null=True)
     recepcionist = models.ForeignKey(
                             Recepcionist,
                             related_name="appointments",
