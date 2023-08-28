@@ -2,7 +2,7 @@ from datetime import date
 today = date.today()
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 
 class BaseModel(models.Model):
@@ -101,7 +101,7 @@ class Recepcionist(BaseModel, PersonaBaseModel):
                     User,
                     verbose_name="Nombre de Usuario",
                     related_name="recepcionist",
-                    on_delete=models.CASCADE, blank=True, null=True)
+                    on_delete=models.CASCADE, blank=True, null=True, editable=False)
     
     
     phone = models.CharField(max_length=40, null=True, blank=True)
@@ -129,7 +129,11 @@ class Recepcionist(BaseModel, PersonaBaseModel):
                     last_name=self.last_name,
                     is_active = True,
                     is_staff = True,
-                )
+
+                    
+                                    )
+            receptionist_group = Group.objects.get(name="recepcionistas")
+            self.user.groups.add(receptionist_group) 
             self.user.save()
         super().save(*args, **kwargs)
 
@@ -146,6 +150,7 @@ class Appointment(BaseModel):
                             on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     
     start_date = models.DateTimeField(verbose_name="Fecha de inicio",)
+    arrival_date = models.DateTimeField(verbose_name="Fecha de llegada", blank=True, null=True)
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
