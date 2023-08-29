@@ -62,13 +62,13 @@ class AppointmentAdmin(admin.ModelAdmin):
             except:
                 pass
         obj.save()
-    list_display = ['start','office', 'patient', 'arrival_date', 'doctor', 'area', 'recepcionist']
-    list_display_links = ['start' , 'patient']
-    list_filter = ['ship__office__number']
+    list_display = [ 'office','ship','start', 'patient', 'arrival_date', 'recepcionist']
+    list_display_links = ['office','ship','start', 'patient',]
+    list_filter = ['ship__doctor']
 
     search_fields = ['patient__name','patient__last_name', 'ship__doctor__last_name', 'ship__doctor__name', 'ship__doctor__area__name']
     date_hierarchy = 'ship__date'
-    
+    list_editable = ['arrival_date']
    
     
     def get_fieldsets(self, request, obj=None):
@@ -104,7 +104,12 @@ class AppointmentInline(admin.StackedInline):
  
 class DoctorAgendaAdmin(admin.ModelAdmin):
     inlines = [AppointmentInline]
-   
+    list_display = [ 'doctor','date']
+    list_display_links = ['doctor','date']
+    list_filter = ['doctor' ]
+
+    search_fields = ['doctor__name','doctor__last_name']
+    date_hierarchy = 'date'
     
 admin.site.register(DoctorAgenda, DoctorAgendaAdmin)
 

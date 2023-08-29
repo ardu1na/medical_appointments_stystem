@@ -109,7 +109,15 @@ class DoctorAgenda(BaseModel):
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
-
+    class Meta:
+        verbose_name_plural = "Agendas"
+        verbose_name = "Agenda"
+    
+    
+    def __str__ (self):
+        inicial = self.doctor.name[-1].upper()
+        f_date = self.date.strftime('%d/%m')
+        return f'{f_date} {self.doctor.last_name} {inicial}. ({self.doctor.area.name})'
 
 class Recepcionist(BaseModel, PersonaBaseModel):
     user = models.OneToOneField(
