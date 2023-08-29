@@ -1,10 +1,8 @@
-from typing import Optional, Type
 from django.contrib import admin
-from django.contrib.admin.sites import AdminSite
 
 from reservations.models import Patient, Doctor, \
     Recepcionist, HealthInsurance, Area, \
-    Appointment, Office
+    Appointment, Office, DoctorAgenda
 
 
 
@@ -14,7 +12,7 @@ admin.site.index_title = 'Administración'
 admin.site.site_title = 'Administración'
 
 
-    
+
 admin.site.register(Recepcionist)
 admin.site.register(Office)
 
@@ -53,6 +51,9 @@ class HealthInsuranceAdmin(admin.ModelAdmin):
     inlines = [PatientInline,]
 admin.site.register(HealthInsurance, HealthInsuranceAdmin) 
     
+    
+    
+    
 class AppointmentAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not obj.recepcionist:
@@ -61,25 +62,19 @@ class AppointmentAdmin(admin.ModelAdmin):
             except:
                 pass
         obj.save()
-    list_display = ['start','office', 'patient', 'arrival', 'doctor', 'area', 'recepcionist']
+    list_display = ['start','office', 'patient', 'arrival_date', 'doctor', 'area', 'recepcionist']
     list_display_links = ['start' , 'patient']
-    list_filter = ['office']
+    list_filter = ['ship__office__number']
 
-    search_fields = ['patient__name','patient__last_name', 'doctor__last_name', 'doctor__name', 'doctor__area__name']
-    date_hierarchy = 'start_date'
+    search_fields = ['patient__name','patient__last_name', 'ship__doctor__last_name', 'ship__doctor__name', 'ship__doctor__area__name']
+    date_hierarchy = 'ship__date'
     
-    @admin.display(description='Llegada')
-    def arrival(self, obj, *args):
-        s = obj.arrival_date
-        
-        if s != None:
-            s = s.strftime('%H:%M')
-        return s
+   
     
     def get_fieldsets(self, request, obj=None):
         if obj is None: 
             fieldsets = [
-                ("General", {'fields': ('patient', 'doctor', 'office','start_date')}),
+                ("General", {'fields': ('patient', 'ship', 'start')}),
                 ('Notas', {
                     'classes': ('collapse',),
                     'fields': ('notes',)
@@ -89,7 +84,7 @@ class AppointmentAdmin(admin.ModelAdmin):
             fieldsets = [
                 ("Recepción", {'fields': ('arrival_date', )}),
 
-                ("General", {'fields': ('patient', 'doctor', 'office','start_date')}),
+                ("General", {'fields': ('patient', 'ship', 'start')}),
                 ('Notas', {
                     'classes': ('collapse',),
                     'fields': ('notes',)
@@ -106,8 +101,21 @@ class AppointmentInline(admin.StackedInline):
     extra = 0
     show_change_link = True
 
+ 
+class DoctorAgendaAdmin(admin.ModelAdmin):
+    inlines = [AppointmentInline]
+   
+    
+admin.site.register(DoctorAgenda, DoctorAgendaAdmin)
+
+class DoctorAgendaInline(admin.StackedInline):
+    model = DoctorAgenda
+    extra = 0
+    show_change_link = True
+    
+    
 class DoctorAdmin(admin.ModelAdmin):
-    inlines = [AppointmentInline,]
+    inlines = [DoctorAgendaInline,]
     list_display = ['id', 'name', 'last_name', 'area']
     search_fields = ['name', 'last_name', 'area']
     list_filter = ['area']

@@ -91,12 +91,24 @@ class Doctor(BaseModel, PersonaBaseModel):
     class Meta:
         verbose_name_plural = "Profesionales"
         verbose_name = "Profesional"
-
+    
+    
     def __str__ (self):
         inicial = self.name[-1].upper()
         return f'{self.last_name} {inicial}. ({self.area.name})'
     
-
+class DoctorAgenda(BaseModel):
+    doctor = models.ForeignKey(
+        Doctor, related_name="agendas",verbose_name="profesional", on_delete=models.SET_NULL, null=True)
+    
+    office = models.ForeignKey(
+        'Office', related_name="agendas",verbose_name="consultorio", on_delete=models.SET_NULL, null=True)
+    
+    date = models.DateField(
+        verbose_name="Día",)
+    
+    notes = models.TextField(null=True, verbose_name="Notas", blank=True)
+    
 
 
 class Recepcionist(BaseModel, PersonaBaseModel):
@@ -154,40 +166,45 @@ class Office(BaseModel):
 class Appointment(BaseModel):
     patient = models.ForeignKey(
         Patient, related_name="appointments", verbose_name="paciente",on_delete=models.CASCADE)
-    doctor = models.ForeignKey(
-        Doctor, related_name="appointments",verbose_name="profesional", on_delete=models.SET_NULL, null=True)
-    office = models.ForeignKey(
-        Office, related_name="appointments",verbose_name="consultorio", on_delete=models.SET_NULL, null=True)
+    
+    ship = models.ForeignKey(
+        DoctorAgenda, related_name="appointments",verbose_name="turno", on_delete=models.SET_NULL, null=True)
+    
     recepcionist = models.ForeignKey(
                             Recepcionist,
                             related_name="appointments",
                             verbose_name="recepcionista",
                             on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     
-    start_date = models.DateTimeField(
-        verbose_name="Fecha y hora",)
-    arrival_date = models.DateTimeField(
+    start = models.TimeField(
+        verbose_name="Hora", null=True)
+    arrival_date = models.TimeField(
         verbose_name="Llegada", blank=True, null=True)
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
     @property
     def area(self):
-        return self.doctor.area
+        return self.ship.doctor.area
     
     @property
-    def start(self):
-        date = self.start_date.strftime('%H:%M %d/%m')
-        return date
+    def office(self):
+        return self.ship.office
+    
+    @property
+    def doctor(self):
+        d = f'{self.ship.doctor.last_name} {self.ship.doctor.name[-1].upper()}'
+        return d
+    
     
     
     
     
     
     def __str__ (self):
-        date = self.start_date.strftime('%H:%M %d/%m')
+        date = self.start.strftime('%H:%M')
 
-        return f'{date} | {self.doctor}'
+        return f'{date} | {self.ship.doctor}'
     
     class Meta:
         verbose_name = "Turno"
