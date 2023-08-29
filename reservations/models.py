@@ -85,6 +85,9 @@ class Area(BaseModel):
 
 class Doctor(BaseModel, PersonaBaseModel):
     area = models.ForeignKey(Area, verbose_name="área", related_name="doctors", on_delete=models.SET_NULL, null=True)
+    
+    notes = models.TextField(null=True, verbose_name="", blank=True)
+    
     class Meta:
         verbose_name_plural = "Profesionales"
         verbose_name = "Profesional"
@@ -149,17 +152,22 @@ class Office(BaseModel):
         verbose_name_plural = "Consultorios"
 
 class Appointment(BaseModel):
-    patient = models.ForeignKey(Patient, related_name="appointments", verbose_name="paciente",on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, related_name="appointments",verbose_name="profesional", on_delete=models.SET_NULL, null=True)
-    office = models.ForeignKey(Office, related_name="appointments",verbose_name="consultorio", on_delete=models.SET_NULL, null=True)
+    patient = models.ForeignKey(
+        Patient, related_name="appointments", verbose_name="paciente",on_delete=models.CASCADE)
+    doctor = models.ForeignKey(
+        Doctor, related_name="appointments",verbose_name="profesional", on_delete=models.SET_NULL, null=True)
+    office = models.ForeignKey(
+        Office, related_name="appointments",verbose_name="consultorio", on_delete=models.SET_NULL, null=True)
     recepcionist = models.ForeignKey(
                             Recepcionist,
                             related_name="appointments",
                             verbose_name="recepcionista",
                             on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     
-    start_date = models.DateTimeField(verbose_name="Fecha de inicio",)
-    arrival_date = models.DateTimeField(verbose_name="Fecha de llegada", blank=True, null=True)
+    start_date = models.DateTimeField(
+        verbose_name="Fecha y hora",)
+    arrival_date = models.DateTimeField(
+        verbose_name="Llegada", blank=True, null=True)
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
@@ -186,3 +194,16 @@ class Appointment(BaseModel):
         verbose_name_plural = "Turnos"
         
         
+        
+        """
+        
+
+class time_slots(models.Model):
+    doctor_id=models.CharField(max_length=100)
+    from_time=models.CharField(max_length=10)
+    to_time=models.CharField(max_length=10)
+
+    class Meta:
+        db_table='time_slots'
+        
+        """

@@ -9,3 +9,7 @@
     # foratear upercase o title case corretamente al guardar
     # iconos al navbar del ui
 """
+
+# source env/Scripts/activate
+# cd core
+# py manage.py runserver
