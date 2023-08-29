@@ -57,10 +57,7 @@ class Patient(BaseModel, PersonaBaseModel):
     
     healt_insurance = models.ForeignKey(HealthInsurance, related_name="patients",verbose_name="obra social", on_delete=models.SET_NULL, null=True)
     
-    insurance_data = models.CharField(verbose_name="N° de Afiliado", max_length=100, null=True, blank=True)
-    
-    arrived_time = models.DateTimeField(null=True, blank=True)
-    
+    insurance_data = models.CharField(verbose_name="N° de Afiliado", max_length=100, null=True, blank=True)   
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
@@ -71,6 +68,17 @@ class Patient(BaseModel, PersonaBaseModel):
     class Meta:
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
+        
+    def save(self, *args, **kwargs):
+        n = self.name
+        n = n.capitalize()
+        self.name = n
+        
+        ln = self.last_name
+        ln = ln.capitalize()
+        self.last_name = ln
+        
+        super().save(*args, **kwargs)
     
     def __str__ (self):
         return f'{self.last_name}, {self.name}'
@@ -79,7 +87,15 @@ class Patient(BaseModel, PersonaBaseModel):
 class Area(BaseModel):
     name = models.CharField(max_length=100, verbose_name="nombre")
     
-    
+     
+    def save(self, *args, **kwargs):
+        n = self.name
+        n = n.upper()
+        self.name = n
+        
+        
+        super().save(*args, **kwargs)
+        
     def __str__ (self):
         return self.name
 
@@ -92,7 +108,19 @@ class Doctor(BaseModel, PersonaBaseModel):
         verbose_name_plural = "Profesionales"
         verbose_name = "Profesional"
     
-    
+     
+    def save(self, *args, **kwargs):
+        n = self.name
+        n = n.capitalize()
+        self.name = n
+        
+        ln = self.last_name
+        ln = ln.capitalize()
+        self.last_name = ln
+        
+        super().save(*args, **kwargs)
+        
+        
     def __str__ (self):
         inicial = self.name[-1].upper()
         return f'{self.last_name} {inicial}. ({self.area.name})'
@@ -126,7 +154,17 @@ class Recepcionist(BaseModel, PersonaBaseModel):
                     related_name="recepcionist",
                     on_delete=models.CASCADE, blank=True, null=True, editable=False)
     
-    
+     
+    def save(self, *args, **kwargs):
+        n = self.name
+        n = n.capitalize()
+        self.name = n
+        
+        ln = self.last_name
+        ln = ln.capitalize()
+        self.last_name = ln
+        
+        super().save(*args, **kwargs)
     phone = models.CharField(max_length=40, null=True, blank=True)
     whats_app = models.CharField(max_length=40, null=True, blank=True)
     email = models.EmailField()
@@ -140,6 +178,16 @@ class Recepcionist(BaseModel, PersonaBaseModel):
     
            
     def save(self, *args, **kwargs):
+         
+        n = self.name
+        n = n.capitalize()
+        self.name = n
+        
+        ln = self.last_name
+        ln = ln.capitalize()
+        self.last_name = ln
+        
+        
         if not self.user:
             name = self.name.lower().replace(' ', '_')
             last_name = self.last_name.lower().replace(' ', '_')
