@@ -84,7 +84,7 @@ class AppointmentAdmin(admin.ModelAdmin):
             fieldsets = [
                 ("Recepción", {'fields': ('arrival_date', )}),
 
-                ("General", {'fields': ('patient', 'ship', 'start')}),
+                ("General", {'fields': ('patient', 'ship', 'start', 'end')}),
                 ('Notas', {
                     'classes': ('collapse',),
                     'fields': ('notes',)

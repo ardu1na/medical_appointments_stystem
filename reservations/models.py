@@ -1,9 +1,11 @@
-from datetime import date
-today = date.today()
+from datetime import date, timedelta, datetime
 
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.contrib.auth.models import User, Group
 
+today = date.today()
 
 class BaseModel(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
@@ -233,9 +235,14 @@ class Appointment(BaseModel):
                             on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     
     start = models.TimeField(
-        verbose_name="Hora", null=True)
+        verbose_name="Hora del turno", null=True)
+    
+    end = models.TimeField(
+        verbose_name="Hora de finalización", blank=True, null=True)
+    
+    
     arrival_date = models.TimeField(
-        verbose_name="Llegada", blank=True, null=True)
+        verbose_name="Hora de llegada", blank=True, null=True)
     
     notes = models.TextField(null=True, verbose_name="Notas", blank=True)
     
@@ -254,8 +261,35 @@ class Appointment(BaseModel):
     
     
     
+
+    def clean(self):
+        # Check for overlapping appointments for the same doctor
+        overlapping_appointments = Appointment.objects.filter(
+            ship__doctor=self.ship.doctor,
+            start=self.start,
+            ship__date=self.ship.date,
+        ).exclude(pk=self.pk)
+
+        if overlapping_appointments.exists():
+            raise ValidationError(
+                _("Este turno ya está tomado.")
+            )
+
+        super().clean()
+
     
+    def calculate_default_end(self):
+        if self.start:
+            #
+            delta = timedelta(minutes=30)
+            new_time = (datetime.combine(datetime.min, self.start) + delta).time()
+            return new_time
+        return None
     
+    def save(self, *args, **kwargs):
+        if not self.end:
+            self.end = self.calculate_default_end()
+        super().save(*args, **kwargs)
     
     def __str__ (self):
         date = self.start.strftime('%H:%M')

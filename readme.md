@@ -9,7 +9,12 @@
     # iconos al navbar del ui
     # auto generar agenda con cronjob en base a la disponibildad del médico (días de la semana, horarios)
     #   ensure that appointments for a doctor do not overlap with each other in time
-    # integrar lapsos de tiempo. 
+    # integrar lapsos de tiempo.
+    
+
+
+    # adding end time to each Appointment instance (default + 1/2 hour)
+    
 """
 
 # source env/Scripts/activate
