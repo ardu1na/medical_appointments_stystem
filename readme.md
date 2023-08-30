@@ -7,6 +7,9 @@
     # export data
     # make new user change its pass ADVISE
     # iconos al navbar del ui
+    # auto generar agenda con cronjob en base a la disponibildad del médico (días de la semana, horarios)
+    #   ensure that appointments for a doctor do not overlap with each other in time
+    # integrar lapsos de tiempo. 
 """
 
 # source env/Scripts/activate

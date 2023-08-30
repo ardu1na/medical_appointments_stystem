@@ -62,7 +62,7 @@ class AppointmentAdmin(admin.ModelAdmin):
             except:
                 pass
         obj.save()
-    list_display = [ 'office','ship','start', 'patient', 'arrival_date', 'recepcionist']
+    list_display = [ 'office','start','ship', 'patient', 'arrival_date', 'recepcionist']
     list_display_links = ['office','ship','start', 'patient',]
     list_filter = ['ship__doctor']
 

@@ -268,15 +268,3 @@ class Appointment(BaseModel):
         
         
         
-        """
-        
-
-class time_slots(models.Model):
-    doctor_id=models.CharField(max_length=100)
-    from_time=models.CharField(max_length=10)
-    to_time=models.CharField(max_length=10)
-
-    class Meta:
-        db_table='time_slots'
-        
-        """
